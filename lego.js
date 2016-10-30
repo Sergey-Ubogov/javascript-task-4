@@ -4,7 +4,7 @@
  * Сделано задание на звездочку
  * Реализованы методы or и and
  */
-exports.isStar = false;
+exports.isStar = true;
 
 function getCopyCollection(collection) {
     var copyCollection = [];
@@ -185,17 +185,18 @@ if (exports.isStar) {
         }
 
         return function or() {
-            var filteredList = [];
             var collection = getCopyCollection(arguments[0]);
-            filters.forEach(function (filter) {
-                filteredList = filteredList.concat(filter(collection));
-            });
             var filteredListNoRepeat = [];
-            filteredList.forEach(function (friend) {
-                if (containFriend(friend, filteredListNoRepeat)) {
-                    return;
+            collection.forEach(function (friend) {
+                var friendSuit = false;
+                filters.forEach(function (filter) {
+                    if (containFriend(friend, filter(collection))) {
+                        friendSuit = true;
+                    }
+                });
+                if (friendSuit) {
+                    filteredListNoRepeat.push(friend);
                 }
-                filteredListNoRepeat.push(friend);
             });
 
             return filteredListNoRepeat;
