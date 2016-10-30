@@ -155,16 +155,18 @@ exports.limit = function (count) {
 
 function containFriend(friend, friends) {
     var quantityEqualFields = 0;
+    var containFind = false;
     friends.forEach(function (elem) {
         quantityEqualFields = 0;
         for (var i in elem) {
             if (String(elem[i]) === String(friend[i])) {
                 quantityEqualFields++;
+                containFind = quantityEqualFields === Object.keys(friend).length;
             }
         }
     });
 
-    return quantityEqualFields === Object.keys(friend).length;
+    return containFind;
 }
 
 if (exports.isStar) {
