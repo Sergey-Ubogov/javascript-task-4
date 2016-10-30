@@ -2,6 +2,22 @@
 
 exports.isStar = false;
 
+function getCopyCollection(collection) {
+    var copyCollection = [];
+    collection.forEach(function (friend) {
+        var copyFriend = {};
+        for (var field in friend) {
+            if (friend.hasOwnProperty(field)) {
+                copyFriend[field] = friend[field];
+            }
+        }
+        copyCollection.push(copyFriend);
+    });
+
+    return copyCollection;
+}
+
+
 /**
  * Запрос к коллекции
  * @param {Array} collection
@@ -9,7 +25,7 @@ exports.isStar = false;
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var copyCollection = collection.slice();
+    var copyCollection = getCopyCollection(collection);
     console.info(copyCollection);
     var functions = [];
     for (var i = 1; i < arguments.length; i++) {
