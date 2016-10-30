@@ -161,7 +161,8 @@ function containFriend(friend, friends) {
         for (var i in elem) {
             if (String(elem[i]) === String(friend[i])) {
                 quantityEqualFields++;
-                containFind = quantityEqualFields === Object.keys(friend).length && !containFind;
+                containFind = containFind ? true : quantityEqualFields ===
+                    Object.keys(friend).length;
             }
         }
     });
