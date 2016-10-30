@@ -1,6 +1,10 @@
 'use strict';
 
-exports.isStar = false;
+/**
+ * Сделано задание на звездочку
+ * Реализованы методы or и and
+ */
+exports.isStar = true;
 
 function getCopyCollection(collection) {
     var copyCollection = [];
@@ -30,7 +34,7 @@ exports.query = function (collection) {
     for (var i = 1; i < arguments.length; i++) {
         functions.push(arguments[i]);
     }
-    var priorityFunctions = ['filterIn', 'sortBy', 'select', 'format', 'limit'];
+    var priorityFunctions = ['filterIn', 'and', 'or', 'sortBy', 'select', 'format', 'limit'];
     functions.sort(function (functionOne, functionTwo) {
         return priorityFunctions.indexOf(functionOne.name) -
         priorityFunctions.indexOf(functionTwo.name);
@@ -80,7 +84,7 @@ exports.filterIn = function (property, values) {
 
     return function filterIn() {
         var filteredList = [];
-        getCopyCollection(arguments[0]).forEach(function (friend) {
+        arguments[0].forEach(function (friend) {
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
@@ -155,17 +159,51 @@ if (exports.isStar) {
      * Фильтрация, объединяющая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.or = function () {
-        return;
+        var filters = [];
+        for (var i = 0; i < arguments.length; i++) {
+            filters.push(arguments[i]);
+        }
+
+        return function or() {
+            var filteredList = [];
+            var collection = arguments[0];
+            filters.forEach(function (filter) {
+                filteredList = filteredList.concat(filter(collection));
+            });
+            var filteredListNoRepeat = [];
+            filteredList.forEach(function (friend) {
+                if (friend in filteredListNoRepeat) {
+                    return;
+                }
+                filteredListNoRepeat.push(friend);
+            });
+
+            return filteredListNoRepeat;
+        };
     };
 
     /**
      * Фильтрация, пересекающая фильтрующие функции
      * @star
      * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
     exports.and = function () {
-        return;
+        var filters = [];
+        for (var i = 0; i < arguments.length; i++) {
+            filters.push(arguments[i]);
+        }
+
+        return function add() {
+            var collection = arguments[0];
+            filters.forEach(function (filter) {
+                collection = filter(collection);
+            });
+
+            return collection;
+        };
     };
 }
