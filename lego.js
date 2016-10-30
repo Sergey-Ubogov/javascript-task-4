@@ -153,6 +153,23 @@ exports.limit = function (count) {
     };
 };
 
+function containFriend(friend, friends) {
+    var quantityEqualFields = 0;
+    friends.forEach(function (elem) {
+        quantityEqualFields = 0;
+        for (var i in elem) {
+            if (String(elem[i]) === String(friend[i])) {
+                return quantityEqualFields++;
+            }
+        }
+    });
+    if (quantityEqualFields === friend.length) {
+        return true;
+    }
+
+    return false;
+}
+
 if (exports.isStar) {
 
     /**
@@ -173,9 +190,10 @@ if (exports.isStar) {
             filters.forEach(function (filter) {
                 filteredList = filteredList.concat(filter(collection));
             });
+            console.info(filteredList);
             var filteredListNoRepeat = [];
             filteredList.forEach(function (friend) {
-                if (friend in filteredListNoRepeat) {
+                if (containFriend(friend, filteredListNoRepeat)) {
                     return;
                 }
                 filteredListNoRepeat.push(friend);
