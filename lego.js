@@ -197,7 +197,7 @@ if (exports.isStar) {
             filters.push(arguments[i]);
         }
 
-        return function add() {
+        return function and() {
             var collection = arguments[0];
             filters.forEach(function (filter) {
                 collection = filter(collection);
