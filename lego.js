@@ -169,7 +169,7 @@ if (exports.isStar) {
 
         return function or() {
             var filteredList = [];
-            var collection = arguments[0];
+            var collection = getCopyCollection(arguments[0]);
             filters.forEach(function (filter) {
                 filteredList = filteredList.concat(filter(collection));
             });
@@ -198,7 +198,7 @@ if (exports.isStar) {
         }
 
         return function and() {
-            var collection = arguments[0];
+            var collection = getCopyCollection(arguments[0]);
             filters.forEach(function (filter) {
                 collection = filter(collection);
             });
