@@ -1,133 +1,223 @@
 'use strict';
 
-var lego = require('./lego');
+/**
+ * Сделано задание на звездочку
+ * Реализованы методы or и and
+ */
+exports.isStar = true;
 
-var friends = [
-    {
-        name: 'Сэм',
-        age: 29,
-        gender: 'Мужской',
-        email: 'luisazamora@example.com',
-        phone: '+7 (555) 505-3570',
-        favoriteFruit: 'Картофель'
-    },
-    {
-        name: 'Эмили',
-        age: 30,
-        gender: 'Женский',
-        email: 'roachpugh@example.com',
-        phone: '+7 (555) 539-2625',
-        favoriteFruit: 'Яблоко'
-    },
-    {
-        name: 'Мэт',
-        age: 27,
-        gender: 'Мужской',
-        email: 'danamcgee@example.com',
-        phone: '+7 (555) 526-2845',
-        favoriteFruit: 'Яблоко'
-    },
-    {
-        name: 'Брэд',
-        age: 28,
-        gender: 'Мужской',
-        email: 'newtonwilliams@example.com',
-        phone: '+7 (555) 519-3304',
-        favoriteFruit: 'Банан'
-    },
-    {
-        name: 'Шерри',
-        age: 27,
-        gender: 'Женский',
-        email: 'danamcgee@example.com',
-        phone: '+7 (555) 526-2845',
-        favoriteFruit: 'Картофель'
-    },
-    {
-        name: 'Керри',
-        age: 36,
-        gender: 'Женский',
-        email: 'danamcgee@example.com',
-        phone: '+7 (555) 526-2845',
-        favoriteFruit: 'Апельсин'
-    },
-    {
-        name: 'Стелла',
-        age: 25,
-        gender: 'Женский',
-        email: 'waltersguzman@example.com',
-        phone: '+7 (555) 415-3100',
-        favoriteFruit: 'Картофель'
+function getCopyCollection(collection) {
+    var copyCollection = [];
+    collection.forEach(function (friend) {
+        var copyFriend = {};
+        for (var field in friend) {
+            if (friend.hasOwnProperty(field)) {
+                copyFriend[field] = friend[field];
+            }
+        }
+        copyCollection.push(copyFriend);
+    });
+
+    return copyCollection;
+}
+
+
+/**
+ * Запрос к коллекции
+ * @param {Array} collection
+ * @params {...Function} – Функции для запроса
+ * @returns {Array}
+ */
+exports.query = function (collection) {
+    var copyCollection = getCopyCollection(collection);
+    var functions = [];
+    for (var i = 1; i < arguments.length; i++) {
+        functions.push(arguments[i]);
     }
-];
+    var priorityFunctions = ['filterIn', 'and', 'or', 'sortBy', 'select', 'format', 'limit'];
+    functions.sort(function (functionOne, functionTwo) {
+        return priorityFunctions.indexOf(functionOne.name) -
+        priorityFunctions.indexOf(functionTwo.name);
+    });
+    //  console.info(functions);
+    functions.forEach(function (func) {
+        copyCollection = func(copyCollection);
+    });
 
-// Находим настоящих друзей
-var bestFriends = lego.query(
+    return copyCollection;
+};
 
-    // среди всех друзей.
-    friends,
+/**
+ * Выбор полей
+ * @params {...String}
+ * @returns {Function}
+ */
+exports.select = function () {
+    var selectFields = [];
+    for (var i = 0; i < arguments.length; i++) {
+        selectFields.push(arguments[i]);
+    }
 
-    // Выбираем имена и email для праздничной рассылки
-    lego.select('name', 'gender', 'email'),
 
-    // Отбираем только тех, кто любит Яблоки или Картофель (самое важное !!!)
-    lego.filterIn('favoriteFruit', ['Яблоко', 'Картофель']),
+    return function select() {
+        return getCopyCollection(arguments[0]).map(function (friend) {
+            var requiredFields = {};
+            selectFields.forEach(function (field) {
+                if (friend.hasOwnProperty(field)) {
+                    requiredFields[field] = friend[field];
+                }
+            });
 
-    // Отсортируем их по возрасту (но зачем?)
-    lego.sortBy('age', 'asc'), // Бывает только asc (от меньшего к большему) или desc (наоборот)
+            return requiredFields;
+        });
+    };
+};
 
-    // А пол выведем только первой буквой для удобства
-    lego.format('gender', function (value) {
-        return value[0];
-    }),
+/**
+ * Фильтрация поля по массиву значений
+ * @param {String} property – Свойство для фильтрации
+ * @param {Array} values – Доступные значения
+ * @returns {Function}
+ */
+exports.filterIn = function (property, values) {
+    console.info(property, values);
 
-    // Настоящих друзей не может быть много
-    lego.limit(4)
-);
+    return function filterIn() {
+        var filteredList = [];
+        getCopyCollection(arguments[0]).forEach(function (friend) {
+            values.forEach(function (value) {
+                if (friend[property] === value) {
+                    filteredList.push(friend);
 
-console.info(bestFriends);
+                    return;
+                }
+            });
+        });
 
-/* Выведет:
-[
-    { name: 'Стелла', gender: 'Ж', email: 'waltersguzman@example.com' },
-    { name: 'Мэт', gender: 'М', email: 'danamcgee@example.com' },
-    { name: 'Шерри', gender: 'Ж', email: 'danamcgee@example.com' },
-    { name: 'Сэм', gender: 'М', email: 'luisazamora@example.com' }
-]
-*/
+        return filteredList;
+    };
+};
 
-if (lego.isStar) {
-    // Билли был бы по-настоящему счастлив, если бы ему удалось провести сразу две вечеринки:
-    // Яблочную для девушек и картофельную для парней
-    bestFriends = lego.query(
-        friends,
+/**
+ * Сортировка коллекции по полю
+ * @param {String} property – Свойство для фильтрации
+ * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
+ * @returns {Function}
+ */
+exports.sortBy = function (property, order) {
+    console.info(property, order);
 
-        lego.select('name'),
+    return function sortBy() {
+        return getCopyCollection(arguments[0]).sort(function (friendOne, friendTwo) {
+            var ord = order === 'asc' ? 1 : -1;
+            if (friendOne[property] > friendTwo[property]) {
+                return ord;
+            }
+            if (friendOne[property] < friendTwo[property]) {
+                return -ord;
+            }
 
-        // Выбираем всех парней, которые любят картофель, и всех девушек, которые любят яблоки
-        lego.or(
-            // Должно сработать хотябы одно условие
-            lego.and(
-                // Должны сработать оба условия
-                lego.filterIn('gender', ['Мужской']),
-                lego.filterIn('favoriteFruit', ['Картофель'])
-            ),
-            lego.and(
-                lego.filterIn('gender', ['Женский']),
-                lego.filterIn('favoriteFruit', ['Яблоко'])
-            )
-        )
-    );
+            return 0;
+        });
+    };
+};
 
-    console.info(bestFriends);
+/**
+ * Форматирование поля
+ * @param {String} property – Свойство для фильтрации
+ * @param {Function} formatter – Функция для форматирования
+ * @returns {Function}
+ */
+exports.format = function (property, formatter) {
+    console.info(property, formatter);
 
-    /* Выведет
-     [
-         { name: 'Сэм' },
-         { name: 'Эмили' },
-         { name: 'Мэт' },
-         { name: 'Шерри' },
-         { name: 'Стелла' }
-     ]
+    return function format() {
+        return getCopyCollection(arguments[0]).map(function (friend) {
+            friend[property] = formatter(friend[property]);
+
+            return friend;
+        });
+    };
+};
+
+/**
+ * Ограничение количества элементов в коллекции
+ * @param {Number} count – Максимальное количество элементов
+ * @returns {Function}
+ */
+exports.limit = function (count) {
+    console.info(count);
+
+    return function limit() {
+        return getCopyCollection(arguments[0]).slice(0, count);
+    };
+};
+
+function containFriend(friend, friends) {
+    var quantityEqualFields = 0;
+    friends.forEach(function (elem) {
+        quantityEqualFields = 0;
+        for (var i in elem) {
+            if (String(elem[i]) === String(friend[i])) {
+                quantityEqualFields++;
+            }
+        }
+    });
+
+    return quantityEqualFields === Object.keys(friend).length;
+}
+
+if (exports.isStar) {
+
+    /**
+     * Фильтрация, объединяющая фильтрующие функции
+     * @star
+     * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
      */
+    exports.or = function () {
+        var filters = [];
+        for (var i = 0; i < arguments.length; i++) {
+            filters.push(arguments[i]);
+        }
+
+        return function or() {
+            var filteredList = [];
+            var collection = getCopyCollection(arguments[0]);
+            filters.forEach(function (filter) {
+                filteredList = filteredList.concat(filter(collection));
+            });
+            var filteredListNoRepeat = [];
+            filteredList.forEach(function (friend) {
+                if (containFriend(friend, filteredListNoRepeat)) {
+                    return;
+                }
+                filteredListNoRepeat.push(friend);
+            });
+
+            return filteredListNoRepeat;
+        };
+    };
+
+    /**
+     * Фильтрация, пересекающая фильтрующие функции
+     * @star
+     * @params {...Function} – Фильтрующие функции
+     * @returns {Function}
+     */
+    exports.and = function () {
+        var filters = [];
+        for (var i = 0; i < arguments.length; i++) {
+            filters.push(arguments[i]);
+        }
+
+        return function and() {
+            var collection = getCopyCollection(arguments[0]);
+            filters.forEach(function (filter) {
+                collection = filter(collection);
+            });
+
+            return collection;
+        };
+    };
 }
