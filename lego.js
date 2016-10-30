@@ -23,7 +23,6 @@ exports.query = function (collection) {
     //  console.info(functions);
     functions.forEach(function (func) {
         copyCollection = func(copyCollection);
-        console.info(copyCollection);
     });
 
     return copyCollection;
@@ -32,7 +31,7 @@ exports.query = function (collection) {
 /**
  * Выбор полей
  * @params {...String}
- * @returns {Array}
+ * @returns {Function}
  */
 exports.select = function () {
     var selectFields = [];
@@ -56,7 +55,7 @@ exports.select = function () {
  * Фильтрация поля по массиву значений
  * @param {String} property – Свойство для фильтрации
  * @param {Array} values – Доступные значения
- * @returns {Array}
+ * @returns {Function}
  */
 exports.filterIn = function (property, values) {
     console.info(property, values);
@@ -64,9 +63,6 @@ exports.filterIn = function (property, values) {
     return function filterIn() {
         var filteredList = [];
         arguments[0].forEach(function (friend) {
-            if (!friend.hasOwnProperty(property)) {
-                return;
-            }
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
@@ -82,7 +78,7 @@ exports.filterIn = function (property, values) {
  * Сортировка коллекции по полю
  * @param {String} property – Свойство для фильтрации
  * @param {String} order – Порядок сортировки (asc - по возрастанию; desc – по убыванию)
- * @returns {Array}
+ * @returns {Function}
  */
 exports.sortBy = function (property, order) {
     console.info(property, order);
@@ -106,7 +102,7 @@ exports.sortBy = function (property, order) {
  * Форматирование поля
  * @param {String} property – Свойство для фильтрации
  * @param {Function} formatter – Функция для форматирования
- * @returns {Array}
+ * @returns {Function}
  */
 exports.format = function (property, formatter) {
     console.info(property, formatter);
@@ -123,7 +119,7 @@ exports.format = function (property, formatter) {
 /**
  * Ограничение количества элементов в коллекции
  * @param {Number} count – Максимальное количество элементов
- * @returns {Array}
+ * @returns {Function}
  */
 exports.limit = function (count) {
     console.info(count);
