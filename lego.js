@@ -84,7 +84,7 @@ exports.filterIn = function (property, values) {
 
     return function filterIn() {
         var filteredList = [];
-        arguments[0].forEach(function (friend) {
+        getCopyCollection(arguments[0]).forEach(function (friend) {
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
