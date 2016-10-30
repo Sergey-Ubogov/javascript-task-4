@@ -54,11 +54,14 @@ exports.select = function () {
         selectFields.push(arguments[i]);
     }
 
+
     return function select() {
         return getCopyCollection(arguments[0]).map(function (friend) {
             var requiredFields = {};
             selectFields.forEach(function (field) {
-                requiredFields[field] = friend[field];
+                if (friend.hasOwnProperty(field)) {
+                    requiredFields[field] = friend[field];
+                }
             });
 
             return requiredFields;
