@@ -26,7 +26,6 @@ function getCopyCollection(collection) {
  */
 exports.query = function (collection) {
     var copyCollection = getCopyCollection(collection);
-    console.info(copyCollection);
     var functions = [];
     for (var i = 1; i < arguments.length; i++) {
         functions.push(arguments[i]);
@@ -78,7 +77,7 @@ exports.filterIn = function (property, values) {
 
     return function filterIn() {
         var filteredList = [];
-        arguments[0].forEach(function (friend) {
+        getCopyCollection(arguments[0]).forEach(function (friend) {
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
@@ -100,7 +99,7 @@ exports.sortBy = function (property, order) {
     console.info(property, order);
 
     return function sortBy() {
-        return arguments[0].sort(function (friendOne, friendTwo) {
+        return getCopyCollection(arguments[0]).sort(function (friendOne, friendTwo) {
             var ord = order === 'asc' ? 1 : -1;
             if (friendOne[property] > friendTwo[property]) {
                 return ord;
@@ -124,7 +123,7 @@ exports.format = function (property, formatter) {
     console.info(property, formatter);
 
     return function format() {
-        return arguments[0].map(function (friend) {
+        return getCopyCollection(arguments[0]).map(function (friend) {
             friend[property] = formatter(friend[property]);
 
             return friend;
@@ -141,7 +140,7 @@ exports.limit = function (count) {
     console.info(count);
 
     return function limit() {
-        return arguments[0].slice(0, count);
+        return getCopyCollection(arguments[0]).slice(0, count);
     };
 };
 
