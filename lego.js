@@ -55,7 +55,7 @@ exports.select = function () {
     }
 
     return function select() {
-        return arguments[0].map(function (friend) {
+        return getCopyCollection(arguments[0]).map(function (friend) {
             var requiredFields = {};
             selectFields.forEach(function (field) {
                 requiredFields[field] = friend[field];
