@@ -41,7 +41,8 @@ exports.query = function (collection) {
     });
     //  console.info(functions);
     functions.forEach(function (func) {
-        copyCollection = func(copyCollection);
+        var processedCollection = func(copyCollection);
+        copyCollection = processedCollection;
     });
 
     return copyCollection;
@@ -58,9 +59,8 @@ exports.select = function () {
         selectFields.push(arguments[i]);
     }
 
-
-    return function select() {
-        return getCopyCollection(arguments[0]).map(function (friend) {
+    return function select(collection) {
+        return collection.map(function (friend) {
             var requiredFields = {};
             selectFields.forEach(function (field) {
                 if (friend.hasOwnProperty(field)) {
@@ -82,9 +82,9 @@ exports.select = function () {
 exports.filterIn = function (property, values) {
     console.info(property, values);
 
-    return function filterIn() {
+    return function filterIn(collection) {
         var filteredList = [];
-        getCopyCollection(arguments[0]).forEach(function (friend) {
+        collection.forEach(function (friend) {
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
@@ -105,10 +105,8 @@ exports.filterIn = function (property, values) {
  * @returns {Function}
  */
 exports.sortBy = function (property, order) {
-    console.info(property, order);
-
-    return function sortBy() {
-        return getCopyCollection(arguments[0]).sort(function (friendOne, friendTwo) {
+    return function sortBy(collection) {
+        return collection.sort(function (friendOne, friendTwo) {
             var ord = order === 'asc' ? 1 : -1;
             if (friendOne[property] > friendTwo[property]) {
                 return ord;
@@ -131,8 +129,8 @@ exports.sortBy = function (property, order) {
 exports.format = function (property, formatter) {
     console.info(property, formatter);
 
-    return function format() {
-        return getCopyCollection(arguments[0]).map(function (friend) {
+    return function format(collection) {
+        return collection.map(function (friend) {
             friend[property] = formatter(friend[property]);
 
             return friend;
@@ -148,26 +146,26 @@ exports.format = function (property, formatter) {
 exports.limit = function (count) {
     console.info(count);
 
-    return function limit() {
-        return getCopyCollection(arguments[0]).slice(0, count);
+    return function limit(collection) {
+        return collection.slice(0, count);
     };
 };
 
-function containFriend(friend, friends) {
+function tryingFindFriend(friend, friends) {
     var quantityEqualFields = 0;
-    var containFind = false;
-    friends.forEach(function (elem) {
+    var friendFind = false;
+    friends.forEach(function (companion) {
         quantityEqualFields = 0;
-        for (var i in elem) {
-            if (String(elem[i]) === String(friend[i])) {
+        for (var i in companion) {
+            if (String(companion[i]) === String(friend[i])) {
                 quantityEqualFields++;
-                containFind = containFind ? true : quantityEqualFields ===
+                friendFind = friendFind ? true : quantityEqualFields ===
                     Object.keys(friend).length;
             }
         }
     });
 
-    return containFind;
+    return friendFind;
 }
 
 if (exports.isStar) {
@@ -184,22 +182,21 @@ if (exports.isStar) {
             filters.push(arguments[i]);
         }
 
-        return function or() {
-            var collection = getCopyCollection(arguments[0]);
-            var filteredListNoRepeat = [];
+        return function or(collection) {
+            var filteredList = [];
             collection.forEach(function (friend) {
-                var friendSuit = false;
+                var foundFriend = false;
                 filters.forEach(function (filter) {
-                    if (containFriend(friend, filter(collection))) {
-                        friendSuit = true;
+                    if (tryingFindFriend(friend, filter(collection))) {
+                        foundFriend = true;
                     }
                 });
-                if (friendSuit) {
-                    filteredListNoRepeat.push(friend);
+                if (foundFriend) {
+                    filteredList.push(friend);
                 }
             });
 
-            return filteredListNoRepeat;
+            return filteredList;
         };
     };
 
@@ -215,8 +212,7 @@ if (exports.isStar) {
             filters.push(arguments[i]);
         }
 
-        return function and() {
-            var collection = getCopyCollection(arguments[0]);
+        return function and(collection) {
             filters.forEach(function (filter) {
                 collection = filter(collection);
             });
