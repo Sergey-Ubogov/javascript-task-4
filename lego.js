@@ -88,8 +88,6 @@ exports.filterIn = function (property, values) {
             values.forEach(function (value) {
                 if (friend[property] === value) {
                     filteredList.push(friend);
-
-                    return;
                 }
             });
         });
