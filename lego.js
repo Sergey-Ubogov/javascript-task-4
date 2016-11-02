@@ -147,7 +147,7 @@ exports.limit = function (count) {
     };
 };
 
-function tryingFindFriend(friend, friends) {
+function isFindFriend(friend, friends) {
     var quantityEqualFields = 0;
     var isFriendFind = false;
     friends.forEach(function (companion) {
@@ -183,7 +183,7 @@ if (exports.isStar) {
             collection.forEach(function (friend) {
                 var isFoundFriend = false;
                 filters.forEach(function (filter) {
-                    if (tryingFindFriend(friend, filter(collection))) {
+                    if (isFindFriend(friend, filter(collection))) {
                         isFoundFriend = true;
                     }
                 });
