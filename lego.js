@@ -29,7 +29,7 @@ function getCopyCollection(collection) {
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var copyCollection = getCopyCollection(collection);
+    var processedCollection = getCopyCollection(collection);
     var functions = [];
     for (var i = 1; i < arguments.length; i++) {
         functions.push(arguments[i]);
@@ -39,13 +39,11 @@ exports.query = function (collection) {
         return priorityFunctions.indexOf(functionOne.name) -
         priorityFunctions.indexOf(functionTwo.name);
     });
-    //  console.info(functions);
     functions.forEach(function (func) {
-        var processedCollection = func(copyCollection);
-        copyCollection = processedCollection;
+        processedCollection = func(processedCollection);
     });
 
-    return copyCollection;
+    return processedCollection;
 };
 
 /**
@@ -151,19 +149,19 @@ exports.limit = function (count) {
 
 function tryingFindFriend(friend, friends) {
     var quantityEqualFields = 0;
-    var friendFind = false;
+    var isFriendFind = false;
     friends.forEach(function (companion) {
         quantityEqualFields = 0;
         for (var i in companion) {
             if (String(companion[i]) === String(friend[i])) {
                 quantityEqualFields++;
-                friendFind = friendFind ? true : quantityEqualFields ===
+                isFriendFind = isFriendFind ? true : quantityEqualFields ===
                     Object.keys(friend).length;
             }
         }
     });
 
-    return friendFind;
+    return isFriendFind;
 }
 
 if (exports.isStar) {
@@ -183,13 +181,13 @@ if (exports.isStar) {
         return function or(collection) {
             var filteredList = [];
             collection.forEach(function (friend) {
-                var foundFriend = false;
+                var isFoundFriend = false;
                 filters.forEach(function (filter) {
                     if (tryingFindFriend(friend, filter(collection))) {
-                        foundFriend = true;
+                        isFoundFriend = true;
                     }
                 });
-                if (foundFriend) {
+                if (isFoundFriend) {
                     filteredList.push(friend);
                 }
             });
