@@ -7,18 +7,16 @@
 exports.isStar = true;
 
 function getCopyCollection(collection) {
-    var copyCollection = [];
-    collection.forEach(function (friend) {
+    return collection.map(function (friend) {
         var copyFriend = {};
         for (var field in friend) {
             if (friend.hasOwnProperty(field)) {
                 copyFriend[field] = friend[field];
             }
         }
-        copyCollection.push(copyFriend);
-    });
 
-    return copyCollection;
+        return copyFriend;
+    });
 }
 
 
@@ -29,21 +27,18 @@ function getCopyCollection(collection) {
  * @returns {Array}
  */
 exports.query = function (collection) {
-    var processedCollection = getCopyCollection(collection);
-    var functions = [];
-    for (var i = 1; i < arguments.length; i++) {
-        functions.push(arguments[i]);
-    }
+    var copyCollection = getCopyCollection(collection);
+    var functions = Array.from(arguments).slice(1);
     var priorityFunctions = ['filterIn', 'and', 'or', 'sortBy', 'select', 'format', 'limit'];
     functions.sort(function (functionOne, functionTwo) {
         return priorityFunctions.indexOf(functionOne.name) -
         priorityFunctions.indexOf(functionTwo.name);
     });
     functions.forEach(function (func) {
-        processedCollection = func(processedCollection);
+        copyCollection = func(copyCollection);
     });
 
-    return processedCollection;
+    return copyCollection;
 };
 
 /**
@@ -52,10 +47,7 @@ exports.query = function (collection) {
  * @returns {Function}
  */
 exports.select = function () {
-    var selectFields = [];
-    for (var i = 0; i < arguments.length; i++) {
-        selectFields.push(arguments[i]);
-    }
+    var selectFields = Array.from(arguments);
 
     return function select(collection) {
         return collection.map(function (friend) {
@@ -81,16 +73,9 @@ exports.filterIn = function (property, values) {
     console.info(property, values);
 
     return function filterIn(collection) {
-        var filteredList = [];
-        collection.forEach(function (friend) {
-            values.forEach(function (value) {
-                if (friend[property] === value) {
-                    filteredList.push(friend);
-                }
-            });
+        return collection.filter(function (friend) {
+            return values.indexOf(friend[property]) !== -1;
         });
-
-        return filteredList;
     };
 };
 
@@ -173,26 +158,19 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.or = function () {
-        var filters = [];
-        for (var i = 0; i < arguments.length; i++) {
-            filters.push(arguments[i]);
-        }
+        var filters = Array.from(arguments);
 
         return function or(collection) {
-            var filteredList = [];
-            collection.forEach(function (friend) {
+            return collection.filter(function (friend) {
                 var isFoundFriend = false;
                 filters.forEach(function (filter) {
                     if (isFindFriend(friend, filter(collection))) {
                         isFoundFriend = true;
                     }
                 });
-                if (isFoundFriend) {
-                    filteredList.push(friend);
-                }
-            });
 
-            return filteredList;
+                return isFoundFriend;
+            });
         };
     };
 
