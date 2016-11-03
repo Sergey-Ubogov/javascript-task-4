@@ -132,23 +132,6 @@ exports.limit = function (count) {
     };
 };
 
-function isFindFriend(friend, friends) {
-    var quantityEqualFields = 0;
-    var isFriendFind = false;
-    friends.forEach(function (companion) {
-        quantityEqualFields = 0;
-        for (var i in companion) {
-            if (String(companion[i]) === String(friend[i])) {
-                quantityEqualFields++;
-                isFriendFind = isFriendFind ? true : quantityEqualFields ===
-                    Object.keys(friend).length;
-            }
-        }
-    });
-
-    return isFriendFind;
-}
-
 if (exports.isStar) {
 
     /**
@@ -162,14 +145,9 @@ if (exports.isStar) {
 
         return function or(collection) {
             return collection.filter(function (friend) {
-                var isFoundFriend = false;
-                filters.forEach(function (filter) {
-                    if (isFindFriend(friend, filter(collection))) {
-                        isFoundFriend = true;
-                    }
+                return filters.some(function (filter) {
+                    return filter(collection).indexOf(friend) !== -1;
                 });
-
-                return isFoundFriend;
             });
         };
     };
@@ -184,11 +162,11 @@ if (exports.isStar) {
         var filters = [].slice.call(arguments);
 
         return function and(collection) {
-            filters.forEach(function (filter) {
-                collection = filter(collection);
+            return collection.filter(function (friend) {
+                return filters.every(function (filter) {
+                    return filter(collection).indexOf(friend) !== -1;
+                });
             });
-
-            return collection;
         };
     };
 }
