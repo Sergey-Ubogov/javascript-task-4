@@ -28,7 +28,7 @@ function getCopyCollection(collection) {
  */
 exports.query = function (collection) {
     var copyCollection = getCopyCollection(collection);
-    var functions = Array.from(arguments).slice(1);
+    var functions = [].slice.call(arguments).slice(1);
     var priorityFunctions = ['filterIn', 'and', 'or', 'sortBy', 'select', 'format', 'limit'];
     functions.sort(function (functionOne, functionTwo) {
         return priorityFunctions.indexOf(functionOne.name) -
@@ -158,7 +158,7 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.or = function () {
-        var filters = Array.from(arguments);
+        var filters = [].slice.call(arguments);
 
         return function or(collection) {
             return collection.filter(function (friend) {
@@ -181,10 +181,7 @@ if (exports.isStar) {
      * @returns {Function}
      */
     exports.and = function () {
-        var filters = [];
-        for (var i = 0; i < arguments.length; i++) {
-            filters.push(arguments[i]);
-        }
+        var filters = [].slice.call(arguments);
 
         return function and(collection) {
             filters.forEach(function (filter) {
